@@ -1,0 +1,28 @@
+version: '3.7'
+
+services:
+
+    todo-server:
+        build:
+            context: .
+        depends_on:
+            - mongodb
+        command: ["./wait-for-it.sh", "mongodb:27017", "--","./node_modules/.bin/nodemon","./bin/www"]
+        ports:
+            - "3000:3000"
+        volumes:
+            - .:/home/node/app:delegated
+            - node_modules:/home/node/app/node_modules
+
+    mongodb:
+        image: mongo
+
+        environment:
+            - MONGO_INITDB_DATABASE=todos
+
+        volumes:
+            - mongo_data:/data/db
+
+volumes:
+    node_modules:
+    mongo_data:

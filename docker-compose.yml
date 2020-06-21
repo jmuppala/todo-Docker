@@ -1,0 +1,47 @@
+version: '3.7'
+
+services:
+
+    todo-client:
+        build:
+            context: ./todo-client
+        depends_on:
+            - todo-server
+        command: ["yarn", "start"]
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./todo-client:/home/node/app:delegated
+            - react_node_modules:/home/node/app/node_modules
+        environment:
+            - CHOKIDAR_USEPOLLING=true
+        tty: true
+        stdin_open: true
+
+    todo-server:
+        build:
+            context: ./todo-server
+        depends_on:
+            - mongodb
+        command: ["./wait-for-it.sh", "mongodb:27017", "--","./node_modules/.bin/nodemon","./bin/www"]
+        ports:
+            - "3001:3001"
+        volumes:
+            - ./todo-server:/home/node/app:delegated
+            - node_modules:/home/node/app/node_modules
+        environment:
+            - PORT=3001
+
+    mongodb:
+        image: mongo
+
+        environment:
+            - MONGO_INITDB_DATABASE=todos
+
+        volumes:
+            - mongo_data:/data/db
+
+volumes:
+    react_node_modules:
+    node_modules:
+    mongo_data:
